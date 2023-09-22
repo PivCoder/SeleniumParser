@@ -1,5 +1,6 @@
-package org.example;
+package Parser.Pages;
 
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -21,14 +22,14 @@ public class SchedulePage {
     @FindBy(xpath = "//*[contains(@class, 'day-name')]")
     private List<WebElement> scheduleDays;
 
-    @FindBy(xpath = "//*[@id=\"user-tabs\"]/ul/li[7]/a")
+    @FindBy(xpath = "//*[@id=\"user-tabs\"]/ul/li[5]/a")
     private WebElement logoutButton;
 
     @FindBy(xpath = "//*[contains(@id, 'datetimepicker1')]")
     private WebElement startDate;
 
-    @FindBy(xpath = "//*[contains(@id, 'datetimepicker2')]")
-    private WebElement endDate;
+    @FindBy(xpath = "//*[contains(@class, 'fa fa-arrow-right')]")
+    private WebElement viewNextWeekSchedule;
 
     public List<WebElement> getSchedule(){
         return mySchedule;
@@ -36,6 +37,23 @@ public class SchedulePage {
 
     public List<WebElement> getScheduleDay(){
         return scheduleDays;
+    }
+
+    public WebElement getStartDate(){
+        return  startDate;
+    }
+
+    public void clearNewDate(){
+        startDate.clear();
+    }
+
+    public void inputNewDate(String freshStartDate){
+        startDate.sendKeys(freshStartDate);
+        startDate.sendKeys(Keys.ENTER);
+    }
+
+    public void viewNextWeekScheduleButton(){
+        viewNextWeekSchedule.click();
     }
 
     public void logOut(){

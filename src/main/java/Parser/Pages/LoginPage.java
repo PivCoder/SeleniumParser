@@ -1,4 +1,4 @@
-package org.example;
+package Parser.Pages;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -22,6 +22,9 @@ public class LoginPage {
     @FindBy(xpath = "//*[contains(@class, 'btn btn-primary')]")
     private WebElement loginButton;
 
+    @FindBy(xpath = "//*[@id=\"user-tabs\"]/ul/li[1]/a//*[@id=\"user-tabs\"]/ul/li[1]/a")
+    private WebElement scheduleButton;
+
     public void inputLogin(String login){
         loginField.sendKeys(login);
     }
@@ -30,7 +33,11 @@ public class LoginPage {
         passwordField.sendKeys(password);
     }
 
-    public void clickButton(){
+    public void clickLoginButton(){
         loginButton.click();
+    }
+
+    public void  clickScheduleButton(){
+        scheduleButton.click();
     }
 }

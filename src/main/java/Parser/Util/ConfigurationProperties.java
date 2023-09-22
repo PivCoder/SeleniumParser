@@ -1,4 +1,4 @@
-package org.example;
+package Parser.Util;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -10,7 +10,7 @@ public class ConfigurationProperties {
     static {
         try {
             //указание пути до файла с настройками
-            fileInputStream = new FileInputStream("src/test/resources/conf.properties");
+            fileInputStream = new FileInputStream("src/main/resources/conf.properties");
             PROPERTIES = new Properties();
             PROPERTIES.load(fileInputStream);
         } catch (IOException e) {
