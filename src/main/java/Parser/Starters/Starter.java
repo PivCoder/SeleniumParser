@@ -36,15 +36,15 @@ public abstract class Starter {
     }
 
     public void scheduleParse() throws ParseException {
-        GregorianCalendar instance = new GregorianCalendar(2023, Calendar.JANUARY,1);
+        GregorianCalendar instance = new GregorianCalendar(2023, Calendar.SEPTEMBER,10);
         DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
         Date startDate = instance.getTime();
         String startDateInString = dateFormat.format(startDate);
-        Date endDate = dateFormat.parse("15.01.2024");
+        Date endDate = dateFormat.parse("27.09.2023");
 
         refreshSchedule(startDateInString);
 
-        try(FileWriter writer = new FileWriter("C://Users/Admin/Desktop/Schedule.txt", false))
+        try(FileWriter writer = new FileWriter("C://Users/Admin/Desktop/Schedule.txt", true))
         {
             while (startDate.before(endDate)) {
                 for (int i = 1; i < schedulePage.getScheduleDay().size(); i++) {

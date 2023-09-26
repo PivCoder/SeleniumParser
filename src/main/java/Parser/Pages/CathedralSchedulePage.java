@@ -1,5 +1,6 @@
 package Parser.Pages;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -10,22 +11,31 @@ import java.util.List;
 public class CathedralSchedulePage {
     public WebDriver webDriver;
 
-    CathedralSchedulePage(WebDriver webDriver){
+    public CathedralSchedulePage(WebDriver webDriver){
         PageFactory.initElements(webDriver, this);
         this.webDriver = webDriver;
     }
 
-    @FindBy(xpath = "//*[@id=\"tree_stage\"]/div/div[2]")
-    private List<WebElement> teachers;
+    @FindBy(xpath = "//*[@id=\"app-main\"]/div/div[1]/div[1]/label/select")
+    private WebElement typeOfSchedule;
 
     @FindBy(xpath = "//*[@id=\"app-main\"]/div/div[1]/div[2]/label/select")
-    private List<WebElement> cathedralSelect;
-    
-    public List<WebElement> getSchedule(){
-        return teachers;
+    private WebElement typeOfCathedral;
+
+    @FindBy(xpath = "//*[@id=\"tree_stage\"]/div/div[2]")
+    private WebElement teachers;
+
+    private final List<WebElement> teachersList = teachers.findElements(By.tagName("a"));
+
+    public WebElement getTypeOfSchedule(){
+        return typeOfSchedule;
     }
 
-    public List<WebElement> getScheduleDay(){
-        return cathedralSelect;
+    public WebElement getCathedral(){
+        return typeOfCathedral;
+    }
+
+    public List<WebElement> getTeachers(){
+        return teachersList;
     }
 }

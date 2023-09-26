@@ -22,7 +22,7 @@ public class LoginPage {
     @FindBy(xpath = "//*[contains(@class, 'btn btn-primary')]")
     private WebElement loginButton;
 
-    @FindBy(xpath = "//*[@id=\"user-tabs\"]/ul/li[1]/a//*[@id=\"user-tabs\"]/ul/li[1]/a")
+    @FindBy(xpath = "//*[@id=\"user-tabs\"]/ul/li[1]/a")
     private WebElement scheduleButton;
 
     public void inputLogin(String login){
