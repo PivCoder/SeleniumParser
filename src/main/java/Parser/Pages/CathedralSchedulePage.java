@@ -22,10 +22,8 @@ public class CathedralSchedulePage {
     @FindBy(xpath = "//*[@id=\"app-main\"]/div/div[1]/div[2]/label/select")
     private WebElement typeOfCathedral;
 
-    @FindBy(xpath = "//*[@id=\"tree_stage\"]/div/div[2]")
-    private WebElement teachers;
-
-    private final List<WebElement> teachersList = teachers.findElements(By.tagName("a"));
+    @FindBy(xpath = "//*[@id=\"tree_stage\"]/div/div[2]/a")
+    private List<WebElement> teachersList;
 
     public WebElement getTypeOfSchedule(){
         return typeOfSchedule;

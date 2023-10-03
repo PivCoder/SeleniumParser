@@ -29,14 +29,13 @@ public class StarterWithoutLogin extends Starter{
         for (int i = 1; i < typeOfCathedral.getOptions().size(); i++) {
             typeOfCathedral.selectByIndex(i);
             for (int j = 0; j < teacherList.size(); j++){
-                System.out.println(teacherList.get(j));
                 teacherList.get(j).click();
-                //try {
-                    //super.scheduleParse();
-                    webDriver.navigate().back();
-                //} catch (ParseException e) {
-                    //e.printStackTrace();
-                //}
+                try {
+                    super.scheduleParse();
+                    loginPage.clickScheduleButton();
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }

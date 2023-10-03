@@ -3,6 +3,7 @@ package Parser.Starters;
 import Parser.Pages.LoginPage;
 import Parser.Pages.SchedulePage;
 import Parser.Util.ConfigurationProperties;
+import Parser.Util.DateFormatter;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -16,6 +17,7 @@ import java.time.Duration;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Scanner;
 
 public abstract class Starter {
     public static LoginPage loginPage;
@@ -36,11 +38,20 @@ public abstract class Starter {
     }
 
     public void scheduleParse() throws ParseException {
-        GregorianCalendar instance = new GregorianCalendar(2023, Calendar.SEPTEMBER,10);
-        DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
-        Date startDate = instance.getTime();
-        String startDateInString = dateFormat.format(startDate);
-        Date endDate = dateFormat.parse("27.09.2023");
+        DateFormatter dateFormatter = new DateFormatter();
+        GregorianCalendar instance = new GregorianCalendar();
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("Введите начальную дату в формате dd.MM.YYYY");
+        String startDateInString = scanner.nextLine();
+
+        Date startDate;
+        startDate = dateFormatter.formatDate(startDateInString);
+        instance.setTime(startDate);
+
+        System.out.println("Введите конечную дату в формате dd.MM.YYYY");
+        String endDateInString = scanner.nextLine();
+        Date endDate =  dateFormatter.formatDate(endDateInString);
 
         refreshSchedule(startDateInString);
 
@@ -57,7 +68,7 @@ public abstract class Starter {
 
                 instance.add(Calendar.DAY_OF_YEAR, 7);
                 startDate = instance.getTime();
-                startDateInString = dateFormat.format(startDate);
+                startDateInString = dateFormatter.formatDateInFormattedString(startDate);
                 refreshSchedule(startDateInString);
             }
         }
