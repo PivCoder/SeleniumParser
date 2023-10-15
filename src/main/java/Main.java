@@ -17,7 +17,7 @@ public class Main {
             case "1":
                 StarterWithLogin starterWithLogin = new StarterWithLogin();
                 starterWithLogin.setup();
-                starterWithLogin.scheduleParse();
+                starterWithLogin.scheduleWriteInFile();
                 starterWithLogin.tearDown();
                 break;
             case "2":

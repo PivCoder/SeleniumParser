@@ -10,20 +10,20 @@ public class StarterWithLogin extends Starter {
     public static ChooseRolePage chooseRolePage;
     public static ChooseMySchedulePage chooseMySchedulePage;
 
-    public void setup(){
+    public void setup() {
         super.setup();
         chooseRolePage = new ChooseRolePage(webDriver);
         chooseMySchedulePage = new ChooseMySchedulePage(webDriver);
     }
 
-    public void scheduleParse(){
+    public void scheduleWriteInFile() {
         try {
             loginPage.inputLogin(ConfigurationProperties.getProperty("login"));
             loginPage.inputPassword(ConfigurationProperties.getProperty("password"));
             loginPage.clickLoginButton();
             chooseRolePage.chooseRole();
             chooseMySchedulePage.chooseMySchedule();
-            super.scheduleParse();
+            super.scheduleWriteInFile();
         } catch (ParseException e) {
             e.printStackTrace();
         }

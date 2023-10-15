@@ -10,9 +10,7 @@ import org.openqa.selenium.chrome.ChromeOptions;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.Calendar;
 import java.util.Date;
@@ -23,8 +21,11 @@ public abstract class Starter {
     public static LoginPage loginPage;
     public static SchedulePage schedulePage;
     public static WebDriver webDriver;
+    private Date startDate;
+    private final GregorianCalendar instance = new GregorianCalendar();
+    private Date endDate;
 
-    public void setup(){
+    public void setup() {
         System.setProperty("webdriver.chrome.driver", ConfigurationProperties.getProperty("chromeDriver"));
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--remote-allow-origins=*");
@@ -37,50 +38,72 @@ public abstract class Starter {
         webDriver.get(ConfigurationProperties.getProperty("loginPage"));
     }
 
-    public void scheduleParse() throws ParseException {
-        DateFormatter dateFormatter = new DateFormatter();
-        GregorianCalendar instance = new GregorianCalendar();
-        Scanner scanner = new Scanner(System.in);
+    public void scheduleWriteInFile() throws ParseException {
+        Date interimDate = startDate;
+        changeStartDate(convertDateInString(interimDate));
 
-        System.out.println("Введите начальную дату в формате dd.MM.YYYY");
-        String startDateInString = scanner.nextLine();
-
-        Date startDate;
-        startDate = dateFormatter.formatDate(startDateInString);
-        instance.setTime(startDate);
-
-        System.out.println("Введите конечную дату в формате dd.MM.YYYY");
-        String endDateInString = scanner.nextLine();
-        Date endDate =  dateFormatter.formatDate(endDateInString);
-
-        refreshSchedule(startDateInString);
-
-        try(FileWriter writer = new FileWriter("C://Users/Admin/Desktop/Schedule.txt", true))
-        {
-            while (startDate.before(endDate)) {
-                for (int i = 1; i < schedulePage.getScheduleDay().size(); i++) {
-                    writer.append(schedulePage.getScheduleDay().get(i).getText());
-                    writer.append("\n");
-                    writer.append(schedulePage.getSchedule().get(i).getText());
-                    writer.append("\n");
+        //TODO переделать на динамический выбор директории, перенести из этого файла класса ?
+        //TODO Подумать как обыграть дату старта и промежуточную дату
+        while (interimDate.before(endDate)) {
+            try (FileWriter writer = new FileWriter("C://Users/Admin/Desktop/Schedule.txt", true)) {
+                for (int i = 0; i < schedulePage.getScheduleDay().size(); i++) {
+                    writer.write(schedulePage.getScheduleDay().get(i).getText());
+                    writer.write("\n");
+                    writer.write(schedulePage.getSchedule().get(i).getText());
+                    writer.write("\n");
                 }
-                writer.flush();
 
+                writer.close();
                 instance.add(Calendar.DAY_OF_YEAR, 7);
-                startDate = instance.getTime();
-                startDateInString = dateFormatter.formatDateInFormattedString(startDate);
-                refreshSchedule(startDateInString);
+                interimDate = instance.getTime();
+                changeStartDate(convertDateInString(interimDate));
+
+            } catch (IOException ex) {
+                System.out.println(ex.getMessage());
             }
-        }
-        catch(IOException ex){
-            System.out.println(ex.getMessage());
         }
     }
 
-    public void refreshSchedule(String startDate){
+    private void changeStartDate(String startDateInString){
         schedulePage.clearNewDate();
-        schedulePage.inputNewDate(startDate);
-        schedulePage.viewNextWeekScheduleButton();
+        schedulePage.inputNewDate(startDateInString);
+    }
+
+    private String convertDateInString(Date dateToString) {
+        DateFormatter dateFormatter = new DateFormatter();
+        return dateFormatter.formatDateInFormattedString(dateToString);
+    }
+
+    public void setStartDate() {
+        Scanner scanner = new Scanner(System.in);
+        DateFormatter dateFormatter = new DateFormatter();
+        System.out.println("Введите начальную дату в формате dd.MM.YYYY");
+        String startDateInString = scanner.nextLine();
+        startDate = dateFormatter.formatDate(startDateInString);
+    }
+
+    public void setInstance(Date dateToInstance) {
+        instance.setTime(dateToInstance);
+    }
+
+    public void setEndDate() {
+        Scanner scanner = new Scanner(System.in);
+        DateFormatter dateFormatter = new DateFormatter();
+        System.out.println("Введите конечную дату в формате dd.MM.YYYY");
+        String endDateInString = scanner.nextLine();
+        endDate = dateFormatter.formatDate(endDateInString);
+    }
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public GregorianCalendar getInstance() {
+        return instance;
+    }
+
+    public Date getEndDate() {
+        return endDate;
     }
 
     public void tearDown() {
