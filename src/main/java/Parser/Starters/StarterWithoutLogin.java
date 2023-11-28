@@ -40,9 +40,7 @@ public class StarterWithoutLogin extends Starter {
             }
         }*/
 
-        //TODO Хз так можно вообще ???
         super.setStartDate();
-        super.setInstance(super.getStartDate());
         super.setEndDate();
 
         //TODO переделать этот костыль в поиск по значению или по тегу

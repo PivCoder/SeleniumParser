@@ -35,7 +35,7 @@ public class SchedulePage {
         return mySchedule;
     }
 
-    public List<WebElement> getScheduleDay(){
+    public List<WebElement> getScheduleDays(){
         return scheduleDays;
     }
 

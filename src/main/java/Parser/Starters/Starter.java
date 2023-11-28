@@ -4,18 +4,18 @@ import Parser.Pages.LoginPage;
 import Parser.Pages.SchedulePage;
 import Parser.Util.ConfigurationProperties;
 import Parser.Util.DateFormatter;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.ParseException;
 import java.time.Duration;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Scanner;
+import java.util.*;
 
 public abstract class Starter {
     public static LoginPage loginPage;
@@ -24,6 +24,7 @@ public abstract class Starter {
     private Date startDate;
     private final GregorianCalendar instance = new GregorianCalendar();
     private Date endDate;
+    private Date interimDate;
 
     public void setup() {
         System.setProperty("webdriver.chrome.driver", ConfigurationProperties.getProperty("chromeDriver"));
@@ -39,39 +40,87 @@ public abstract class Starter {
     }
 
     public void scheduleWriteInFile() throws ParseException {
-        Date interimDate = startDate;
+        deleteScheduleFile();
+
+        interimDate = findPreviousMondayForDate(startDate);
         changeStartDate(convertDateInString(interimDate));
 
-        //TODO переделать на динамический выбор директории, перенести из этого файла класса ?
-        //TODO Подумать как обыграть дату старта и промежуточную дату
+        //TODO переделать на динамический выбор директории
         while (interimDate.before(endDate)) {
-            try (FileWriter writer = new FileWriter("C://Users/Admin/Desktop/Schedule.txt", true)) {
-                for (int i = 0; i < schedulePage.getScheduleDay().size(); i++) {
-                    writer.write(schedulePage.getScheduleDay().get(i).getText());
-                    writer.write("\n");
-                    writer.write(schedulePage.getSchedule().get(i).getText());
-                    writer.write("\n");
-                }
-
-                writer.close();
-                instance.add(Calendar.DAY_OF_YEAR, 7);
-                interimDate = instance.getTime();
-                changeStartDate(convertDateInString(interimDate));
-
-            } catch (IOException ex) {
-                System.out.println(ex.getMessage());
-            }
+            writeScheduleWithDate();
         }
     }
 
-    private void changeStartDate(String startDateInString){
+    private void deleteScheduleFile() {
+        File file = new File("src/main/resources/Schedule.txt");
+
+        if (file.delete()) {
+            System.out.println("File Schedule.txt deleted");
+        } else {
+            System.out.println("Fail Schedule.txt deletion failed !");
+        }
+    }
+
+    private Date findPreviousMondayForDate(Date inputDate) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(inputDate);
+
+        while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
+            calendar.add(Calendar.DAY_OF_WEEK, -1);
+        }
+
+        return calendar.getTime();
+    }
+
+    private void changeStartDate(String startDateInString) {
         schedulePage.clearNewDate();
         schedulePage.inputNewDate(startDateInString);
+    }
+
+    private void writeScheduleWithDate() {
+        try (FileWriter writer = new FileWriter("src/main/resources/Schedule.txt", true)) {
+            List<WebElement> tables = schedulePage.getSchedule();
+            List<WebElement> days = schedulePage.getScheduleDays();
+
+            for (int i = 0; i < tables.size(); i++) {
+                List<WebElement> rows = tables.get(i).findElements(By.tagName("tr"));
+
+                writer.write("\n");
+                writer.write(days.get(i).getText());
+                writer.write("\n");
+
+                for (WebElement row : rows) {
+                    WebElement cell = row.findElement(By.className("table-schedule-discipline"));
+
+                    //TODO выяснить нужно ли выводить header
+                    if (!cell.getText().isEmpty() && !cell.getTagName().equals("th")) {
+                        writer.write(row.getText());
+                        writer.write("\n");
+                    }
+                }
+            }
+
+            writer.close();
+            addSevenDaysForInterimDate();
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
+        }
+    }
+
+    private void addSevenDaysForInterimDate() {
+        setInstance(interimDate);
+        instance.add(Calendar.DAY_OF_YEAR, 7);
+        interimDate = instance.getTime();
+        changeStartDate(convertDateInString(interimDate));
     }
 
     private String convertDateInString(Date dateToString) {
         DateFormatter dateFormatter = new DateFormatter();
         return dateFormatter.formatDateInFormattedString(dateToString);
+    }
+
+    private void setInstance(Date dateToInstance) {
+        instance.setTime(dateToInstance);
     }
 
     public void setStartDate() {
@@ -80,10 +129,6 @@ public abstract class Starter {
         System.out.println("Введите начальную дату в формате dd.MM.YYYY");
         String startDateInString = scanner.nextLine();
         startDate = dateFormatter.formatDate(startDateInString);
-    }
-
-    public void setInstance(Date dateToInstance) {
-        instance.setTime(dateToInstance);
     }
 
     public void setEndDate() {
