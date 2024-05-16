@@ -1,8 +1,7 @@
 HELP.md
 target/
 !.mvn/wrapper/maven-wrapper.jar
-!/src/main//target/
-!/src/test//target/
+!/src/main//target/!/src/test/
 
 ### STS ###
 .apt_generated
@@ -24,10 +23,7 @@ target/
 /nbbuild/
 /dist/
 /nbdist/
-/.nb-gradle/
-build/
-!/src/main//build/
-!/src/test//build/
+/.nb-gradle/build//build/
 
 ### VS Code ###
 .vscode/
@@ -47,3 +43,5 @@ build/
 hs_err_pid
 
 out/
+/gradle/
+/.gradle/

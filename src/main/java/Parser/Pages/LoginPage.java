@@ -8,7 +8,7 @@ import org.openqa.selenium.support.PageFactory;
 public class LoginPage {
     public WebDriver webDriver;
 
-    public LoginPage(WebDriver webDriver){
+    public LoginPage(WebDriver webDriver) {
         PageFactory.initElements(webDriver, this);
         this.webDriver = webDriver;
     }
@@ -25,19 +25,19 @@ public class LoginPage {
     @FindBy(xpath = "//*[@id=\"user-tabs\"]/ul/li[1]/a")
     private WebElement scheduleButton;
 
-    public void inputLogin(String login){
+    public void inputLogin(String login) {
         loginField.sendKeys(login);
     }
 
-    public void inputPassword(String password){
+    public void inputPassword(String password) {
         passwordField.sendKeys(password);
     }
 
-    public void clickLoginButton(){
+    public void clickLoginButton() {
         loginButton.click();
     }
 
-    public void  clickScheduleButton(){
+    public void clickScheduleButton() {
         scheduleButton.click();
     }
 }

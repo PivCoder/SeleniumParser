@@ -1,6 +1,5 @@
 package Parser.Pages;
 
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -11,7 +10,7 @@ import java.util.List;
 public class CathedralSchedulePage {
     public WebDriver webDriver;
 
-    public CathedralSchedulePage(WebDriver webDriver){
+    public CathedralSchedulePage(WebDriver webDriver) {
         PageFactory.initElements(webDriver, this);
         this.webDriver = webDriver;
     }
@@ -25,15 +24,15 @@ public class CathedralSchedulePage {
     @FindBy(xpath = "//*[@id=\"tree_stage\"]/div/div[2]/a")
     private List<WebElement> teachersList;
 
-    public WebElement getTypeOfSchedule(){
+    public WebElement getTypeOfSchedule() {
         return typeOfSchedule;
     }
 
-    public WebElement getCathedral(){
+    public WebElement getCathedral() {
         return typeOfCathedral;
     }
 
-    public List<WebElement> getTeachers(){
+    public List<WebElement> getTeachers() {
         return teachersList;
     }
 }

@@ -9,13 +9,18 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import io.github.bonigarcia.wdm.WebDriverManager;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.ParseException;
 import java.time.Duration;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.Scanner;
 
 public abstract class Starter {
     public static LoginPage loginPage;
@@ -27,9 +32,11 @@ public abstract class Starter {
     private Date interimDate;
 
     public void setup() {
-        System.setProperty("webdriver.chrome.driver", ConfigurationProperties.getProperty("chromeDriver"));
+
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--remote-allow-origins=*");
+
+        WebDriverManager.chromedriver().setup();
 
         webDriver = new ChromeDriver(options);
         loginPage = new LoginPage(webDriver);

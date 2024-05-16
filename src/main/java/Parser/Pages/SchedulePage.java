@@ -11,7 +11,7 @@ import java.util.List;
 public class SchedulePage {
     public WebDriver webDriver;
 
-    public SchedulePage(WebDriver webDriver){
+    public SchedulePage(WebDriver webDriver) {
         PageFactory.initElements(webDriver, this);
         this.webDriver = webDriver;
     }
@@ -31,32 +31,32 @@ public class SchedulePage {
     @FindBy(xpath = "//*[contains(@class, 'fa fa-arrow-right')]")
     private WebElement viewNextWeekSchedule;
 
-    public List<WebElement> getSchedule(){
+    public List<WebElement> getSchedule() {
         return mySchedule;
     }
 
-    public List<WebElement> getScheduleDays(){
+    public List<WebElement> getScheduleDays() {
         return scheduleDays;
     }
 
-    public WebElement getStartDate(){
-        return  startDate;
+    public WebElement getStartDate() {
+        return startDate;
     }
 
-    public void clearNewDate(){
+    public void clearNewDate() {
         startDate.clear();
     }
 
-    public void inputNewDate(String freshStartDate){
+    public void inputNewDate(String freshStartDate) {
         startDate.sendKeys(freshStartDate);
         startDate.sendKeys(Keys.ENTER);
     }
 
-    public void viewNextWeekScheduleButton(){
+    public void viewNextWeekScheduleButton() {
         viewNextWeekSchedule.click();
     }
 
-    public void logOut(){
+    public void logOut() {
         logoutButton.click();
     }
 }
