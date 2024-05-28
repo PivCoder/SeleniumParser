@@ -1,21 +1,30 @@
 package Parser.Starters;
 
+import Parser.Model.Day;
+import Parser.Model.Discipline;
 import Parser.Pages.LoginPage;
 import Parser.Pages.SchedulePage;
 import Parser.Util.ConfigurationProperties;
 import Parser.Util.DateFormatter;
+import Parser.Util.DisciplineConfigurator;
+import Parser.Util.JsonSerializer;
+import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import io.github.bonigarcia.wdm.WebDriverManager;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -48,13 +57,14 @@ public abstract class Starter {
 
     public void scheduleWriteInFile() throws ParseException {
         deleteScheduleFile();
+        deleteFilesScheduleFolder("src/main/resources/Json");
 
         interimDate = findPreviousMondayForDate(startDate);
         changeStartDate(convertDateInString(interimDate));
 
         //TODO переделать на динамический выбор директории
         while (interimDate.before(endDate)) {
-            writeScheduleWithDate();
+            writeScheduleWithDateInJsonFile();
         }
     }
 
@@ -62,9 +72,27 @@ public abstract class Starter {
         File file = new File("src/main/resources/Schedule.txt");
 
         if (file.delete()) {
-            System.out.println("File Schedule.txt deleted");
+            System.out.println("File " + "src/main/resources/Schedule.txt" + " deleted");
         } else {
-            System.out.println("Fail Schedule.txt deletion failed !");
+            System.out.println("Fail " + "src/main/resources/Schedule.txt" + " deletion failed !");
+        }
+    }
+
+    private void deleteFilesScheduleFolder(String directoryPath) {
+        Path dirPath = Paths.get(directoryPath);
+
+        if (!Files.exists(dirPath) || !Files.isDirectory(dirPath)) {
+            throw new IllegalArgumentException("The specified path is not a directory or does not exist: " + directoryPath);
+        }
+
+        try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(dirPath)) {
+            for (Path path : directoryStream) {
+                if (Files.isRegularFile(path)) {
+                    Files.delete(path);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -85,6 +113,7 @@ public abstract class Starter {
     }
 
     private void writeScheduleWithDate() {
+        //TODO переделать в создание объекта и сериализаию в JSON
         try (FileWriter writer = new FileWriter("src/main/resources/Schedule.txt", true)) {
             List<WebElement> tables = schedulePage.getSchedule();
             List<WebElement> days = schedulePage.getScheduleDays();
@@ -112,6 +141,39 @@ public abstract class Starter {
         } catch (IOException ex) {
             System.out.println(ex.getMessage());
         }
+    }
+
+    private void writeScheduleWithDateInJsonFile() {
+        List<WebElement> tables = schedulePage.getSchedule();
+        List<WebElement> days = schedulePage.getScheduleDays();
+        List<Day> dayListToJson = new ArrayList<>();
+        JsonSerializer jsonSerializer = new JsonSerializer();
+        DisciplineConfigurator disciplineConfigurator;
+
+        for (int i = 0; i < tables.size(); i++) {
+            List<WebElement> rows = tables.get(i).findElements(By.tagName("tr"));
+            Day day = new Day();
+            List<Discipline> disciplineList = new ArrayList<>();
+            day.setDayOfWeak(days.get(i).getText());
+
+            for (WebElement row : rows) {
+                WebElement cell = row.findElement(By.className("table-schedule-discipline"));
+
+                //TODO выяснить нужно ли выводить header
+                if (!cell.getText().isEmpty() && !cell.getTagName().equals("th")) {
+                    Discipline discipline = new Discipline();
+                    disciplineConfigurator = new DisciplineConfigurator(discipline);
+                    discipline = disciplineConfigurator.configureDiscipline(row.getText());
+                    disciplineList.add(discipline);
+                }
+            }
+
+            day.setDisciplineList(disciplineList);
+            dayListToJson.add(day);
+        }
+
+        jsonSerializer.convertDayToJson(dayListToJson, interimDate);
+        addSevenDaysForInterimDate();
     }
 
     private void addSevenDaysForInterimDate() {
