@@ -45,10 +45,10 @@ public class StarterWithoutLogin extends Starter {
 
         //TODO переделать этот костыль в поиск по значению или по тегу
         typeOfCathedral.selectByIndex(12);
-        for (int j = 0; j < 1; j++) { //teacherList.size()
+        for (int j = 0; j < teacherList.size(); j++) { //teacherList.size()
             teacherList.get(j).click();
             try {
-                super.scheduleWriteInFile();
+                super.scheduleWriteInFile(j);
                 loginPage.clickScheduleButton();
             } catch (ParseException e) {
                 e.printStackTrace();
