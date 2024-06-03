@@ -2,7 +2,6 @@ package Parser.Util;
 
 import Parser.Model.Discipline;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 

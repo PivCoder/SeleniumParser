@@ -7,6 +7,7 @@ import java.util.Properties;
 public class ConfigurationProperties {
     protected static FileInputStream fileInputStream;
     protected static Properties PROPERTIES;
+
     static {
         try {
             //указание пути до файла с настройками

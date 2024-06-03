@@ -47,6 +47,7 @@ public class StarterWithoutLogin extends Starter {
         typeOfCathedral.selectByIndex(12);
         for (int j = 0; j < teacherList.size(); j++) { //teacherList.size()
             teacherList.get(j).click();
+
             try {
                 super.scheduleWriteInFile(j);
                 loginPage.clickScheduleButton();

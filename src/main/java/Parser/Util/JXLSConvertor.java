@@ -1,5 +1,6 @@
 package Parser.Util;
 
+import Parser.Analyser.DayAnalyser;
 import Parser.Model.Day;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -21,17 +22,19 @@ import java.util.List;
 
 public class JXLSConvertor {
     List<Day> dayList;
+    private int weekHours;
 
     public JXLSConvertor() {
     }
 
-    public JXLSConvertor(List<Day> dayList) {
+    public JXLSConvertor(List<Day> dayList, int weekHours) {
         this.dayList = dayList;
+        this.weekHours = weekHours;
     }
 
     public void convert() {
-        String templatePath = "src/main/resources/template.xlsx";
-        String reportPath = "src/main/resources/grouping_output.xlsx";
+        String templatePath = "src/main/resources/Excel/template.xlsx";
+        String reportPath = "src/main/resources/Excel/grouping_output.xlsx";
 
         try (InputStream templateStream = new FileInputStream(templatePath)) {
             // Проверка наличия файла отчета
@@ -42,6 +45,7 @@ public class JXLSConvertor {
                 try (OutputStream os = new FileOutputStream(reportPath)) {
                     Context context = new Context();
                     context.putVar("dayList", dayList);
+                    context.putVar("weekHours", weekHours);
                     JxlsHelper.getInstance().processTemplate(templateStream, os, context);
                     System.out.println("Initial report created successfully!");
                 }
@@ -62,8 +66,7 @@ public class JXLSConvertor {
                         Context context = new Context();
                         context.putVar("dayList", dayList);
                         context.putVar("startRow", lastRowNum + 1);
-
-                        // Используем JXLS для заполнения шаблона
+                        context.putVar("weekHours", weekHours);
                         JxlsHelper.getInstance().processTemplate(templateStream, tempOutStream, context);
 
                         // Закрываем временный файл, чтобы затем объединить его с существующим

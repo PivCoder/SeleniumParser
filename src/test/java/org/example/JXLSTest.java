@@ -37,7 +37,7 @@ public class JXLSTest {
         dayList.add(day);
         dayList.add(day);
 
-        JXLSConvertor jxlsConvertor = new JXLSConvertor(dayList);
+        jxlsConvertor = new JXLSConvertor(dayList, 6);
         jxlsConvertor.convert();
         jxlsConvertor.convert();
         jxlsConvertor.convert();

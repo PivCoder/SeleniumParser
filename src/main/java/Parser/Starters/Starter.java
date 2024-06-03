@@ -1,5 +1,6 @@
 package Parser.Starters;
 
+import Parser.Analyser.DayAnalyser;
 import Parser.Model.Day;
 import Parser.Model.Discipline;
 import Parser.Pages.LoginPage;
@@ -16,14 +17,9 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.ParseException;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -57,9 +53,11 @@ public abstract class Starter {
         webDriver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
         webDriver.get(ConfigurationProperties.getProperty("loginPage"));
 
+        //TODO удалить
+        /*
         deleteScheduleFile();
         deleteFilesScheduleFolder("src/main/resources/Json");
-        deleteExcelReport();
+        deleteExcelReport();*/
     }
 
     public void scheduleWriteInFile() throws ParseException {
@@ -79,44 +77,6 @@ public abstract class Starter {
         //TODO переделать на динамический выбор директории
         while (interimDate.before(endDate)) {
             writeScheduleWithDateInJsonFile(teacherNumber);
-        }
-    }
-
-    private void deleteScheduleFile() {
-        File file = new File("src/main/resources/Schedule.txt");
-
-        if (file.delete()) {
-            System.out.println("File " + "src/main/resources/Schedule.txt" + " deleted");
-        } else {
-            System.out.println("Fail " + "src/main/resources/Schedule.txt" + " deletion failed !");
-        }
-    }
-
-    private void deleteFilesScheduleFolder(String directoryPath) {
-        Path dirPath = Paths.get(directoryPath);
-
-        if (!Files.exists(dirPath) || !Files.isDirectory(dirPath)) {
-            throw new IllegalArgumentException("The specified path is not a directory or does not exist: " + directoryPath);
-        }
-
-        try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(dirPath)) {
-            for (Path path : directoryStream) {
-                if (Files.isRegularFile(path)) {
-                    Files.delete(path);
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void deleteExcelReport(){
-        File file = new File("src/main/resources/grouping_output.xlsx");
-
-        if (file.delete()) {
-            System.out.println("File " + "src/main/resources/grouping_output.xlsx" + " deleted");
-        } else {
-            System.out.println("Fail " + "src/main/resources/grouping_output.xlsx" + " deletion failed !");
         }
     }
 
@@ -168,6 +128,7 @@ public abstract class Starter {
     }
 
     private void writeScheduleWithDateInJsonFile() {
+        int weekHours;
         List<WebElement> tables = schedulePage.getSchedule();
         List<WebElement> days = schedulePage.getScheduleDays();
         List<Day> dayListToJson = new ArrayList<>();
@@ -180,7 +141,7 @@ public abstract class Starter {
             List<Discipline> disciplineList = new ArrayList<>();
             day.setDayOfWeak(days.get(i).getText());
 
-            if(!new String(day.getDayOfWeak().getBytes(StandardCharsets.UTF_8)).contains("Воскресенье")) {
+            if (!new String(day.getDayOfWeak().getBytes(StandardCharsets.UTF_8)).contains("Воскресенье")) {
                 for (WebElement row : rows) {
                     WebElement cell = row.findElement(By.className("table-schedule-discipline"));
 
@@ -201,13 +162,16 @@ public abstract class Starter {
         jsonSerializer.convertDayToJson(dayListToJson, interimDate);
 
         //TODO вынессти в отдельный метод ?
-        JXLSConvertor jxlsConvertor = new JXLSConvertor(dayListToJson);
+        DayAnalyser dayAnalyser = new DayAnalyser(dayListToJson);
+        weekHours = dayAnalyser.analyseListOfDays();
+        JXLSConvertor jxlsConvertor = new JXLSConvertor(dayListToJson, weekHours);
         jxlsConvertor.convert();
 
         addSevenDaysForInterimDate();
     }
 
     private void writeScheduleWithDateInJsonFile(int teacherNumber) {
+        int weekHours;
         List<WebElement> tables = schedulePage.getSchedule();
         List<WebElement> days = schedulePage.getScheduleDays();
         List<Day> dayListToJson = new ArrayList<>();
@@ -220,7 +184,7 @@ public abstract class Starter {
             List<Discipline> disciplineList = new ArrayList<>();
             day.setDayOfWeak(days.get(i).getText());
 
-            if(!new String(day.getDayOfWeak().getBytes(StandardCharsets.UTF_8)).contains("Воскресенье")) {
+            if (!new String(day.getDayOfWeak().getBytes(StandardCharsets.UTF_8)).contains("Воскресенье")) {
                 for (WebElement row : rows) {
                     WebElement cell = row.findElement(By.className("table-schedule-discipline"));
 
@@ -241,7 +205,9 @@ public abstract class Starter {
         jsonSerializer.convertDayToJson(dayListToJson, interimDate);
 
         //TODO вынессти в отдельный метод ?
-        JXLSConvertor jxlsConvertor = new JXLSConvertor(dayListToJson);
+        DayAnalyser dayAnalyser = new DayAnalyser(dayListToJson);
+        weekHours = dayAnalyser.analyseListOfDays();
+        JXLSConvertor jxlsConvertor = new JXLSConvertor(dayListToJson, weekHours);
         jxlsConvertor.convert();
 
         addSevenDaysForInterimDate();
