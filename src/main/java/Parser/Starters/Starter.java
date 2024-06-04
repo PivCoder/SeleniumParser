@@ -3,6 +3,7 @@ package Parser.Starters;
 import Parser.Analyser.DayAnalyser;
 import Parser.Model.Day;
 import Parser.Model.Discipline;
+import Parser.Model.Teacher;
 import Parser.Pages.LoginPage;
 import Parser.Pages.SchedulePage;
 import Parser.Util.ConfigurationProperties;
@@ -19,6 +20,8 @@ import org.openqa.selenium.chrome.ChromeOptions;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.time.Duration;
@@ -38,6 +41,7 @@ public abstract class Starter {
     private final GregorianCalendar instance = new GregorianCalendar();
     private Date endDate;
     private Date interimDate;
+    private List<Teacher> teacherList = new ArrayList<>();
 
     public void setup() {
 
@@ -97,7 +101,6 @@ public abstract class Starter {
     }
 
     private void writeScheduleWithDate() {
-        //TODO переделать в создание объекта и сериализаию в JSON
         try (FileWriter writer = new FileWriter("src/main/resources/Schedule.txt", true)) {
             List<WebElement> tables = schedulePage.getSchedule();
             List<WebElement> days = schedulePage.getScheduleDays();
@@ -129,9 +132,10 @@ public abstract class Starter {
 
     private void writeScheduleWithDateInJsonFile() {
         int weekHours;
+        Teacher teacher = new Teacher();
         List<WebElement> tables = schedulePage.getSchedule();
         List<WebElement> days = schedulePage.getScheduleDays();
-        List<Day> dayListToJson = new ArrayList<>();
+        List<Day> dayList = new ArrayList<>();
         JsonSerializer jsonSerializer = new JsonSerializer();
         DisciplineConfigurator disciplineConfigurator;
 
@@ -145,7 +149,6 @@ public abstract class Starter {
                 for (WebElement row : rows) {
                     WebElement cell = row.findElement(By.className("table-schedule-discipline"));
 
-                    //TODO выяснить нужно ли выводить header
                     if (!cell.getText().isEmpty() && !cell.getTagName().equals("th")) {
                         Discipline discipline = new Discipline();
                         disciplineConfigurator = new DisciplineConfigurator(discipline);
@@ -155,26 +158,39 @@ public abstract class Starter {
                 }
 
                 day.setDisciplineList(disciplineList);
-                dayListToJson.add(day);
+                dayList.add(day);
             }
         }
 
-        jsonSerializer.convertDayToJson(dayListToJson, interimDate);
+        //TODO в будущем переделать под Teacher
+        //jsonSerializer.convertDayToJson(dayList, interimDate);
+
+        String name = "default";
+        try {
+            byte[] windows1251Bytes = "Преподаватель №".getBytes("Windows-1251");
+            name = new String(windows1251Bytes, StandardCharsets.UTF_8);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
 
         //TODO вынессти в отдельный метод ?
-        DayAnalyser dayAnalyser = new DayAnalyser(dayListToJson);
+        DayAnalyser dayAnalyser = new DayAnalyser(dayList);
         weekHours = dayAnalyser.analyseListOfDays();
-        JXLSConvertor jxlsConvertor = new JXLSConvertor(dayListToJson, weekHours);
-        jxlsConvertor.convert();
+        teacher.setTeacherName(name);
+        teacher.setDayList(dayList);
+        teacher.setWeekHours(weekHours);
+
+        teacherList.add(teacher);
 
         addSevenDaysForInterimDate();
     }
 
     private void writeScheduleWithDateInJsonFile(int teacherNumber) {
         int weekHours;
+        Teacher teacher = new Teacher();
         List<WebElement> tables = schedulePage.getSchedule();
         List<WebElement> days = schedulePage.getScheduleDays();
-        List<Day> dayListToJson = new ArrayList<>();
+        List<Day> dayList = new ArrayList<>();
         JsonSerializer jsonSerializer = new JsonSerializer();
         DisciplineConfigurator disciplineConfigurator;
 
@@ -188,7 +204,6 @@ public abstract class Starter {
                 for (WebElement row : rows) {
                     WebElement cell = row.findElement(By.className("table-schedule-discipline"));
 
-                    //TODO выяснить нужно ли выводить header
                     if (!cell.getText().isEmpty() && !cell.getTagName().equals("th")) {
                         Discipline discipline = new Discipline();
                         disciplineConfigurator = new DisciplineConfigurator(discipline);
@@ -198,17 +213,29 @@ public abstract class Starter {
                 }
 
                 day.setDisciplineList(disciplineList);
-                dayListToJson.add(day);
+                dayList.add(day);
             }
         }
 
-        jsonSerializer.convertDayToJson(dayListToJson, interimDate);
+        //TODO в будущем переделать под Teacher
+        //jsonSerializer.convertDayToJson(dayList, interimDate);
+
+        String name = "default";
+        try {
+            byte[] windows1251Bytes = "Преподаватель №".getBytes("Windows-1251");
+            name = new String(windows1251Bytes, StandardCharsets.UTF_8);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
 
         //TODO вынессти в отдельный метод ?
-        DayAnalyser dayAnalyser = new DayAnalyser(dayListToJson);
+        DayAnalyser dayAnalyser = new DayAnalyser(dayList);
         weekHours = dayAnalyser.analyseListOfDays();
-        JXLSConvertor jxlsConvertor = new JXLSConvertor(dayListToJson, weekHours);
-        jxlsConvertor.convert();
+        teacher.setTeacherName(name + teacherNumber);
+        teacher.setDayList(dayList);
+        teacher.setWeekHours(weekHours);
+
+        teacherList.add(teacher);
 
         addSevenDaysForInterimDate();
     }
@@ -260,5 +287,9 @@ public abstract class Starter {
     public void tearDown() {
         schedulePage.logOut();
         webDriver.quit();
+    }
+
+    public List<Teacher> getTeacherList() {
+        return teacherList;
     }
 }

@@ -2,9 +2,13 @@ package org.example;
 
 import Parser.Model.Day;
 import Parser.Model.Discipline;
+import Parser.Model.Teacher;
 import Parser.Util.JXLSConvertor;
 import org.junit.jupiter.api.Test;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,9 +41,23 @@ public class JXLSTest {
         dayList.add(day);
         dayList.add(day);
 
-        jxlsConvertor = new JXLSConvertor(dayList, 6);
-        jxlsConvertor.convert();
-        jxlsConvertor.convert();
+        Teacher teacher = new Teacher();
+        String name = "default";
+        try {
+            byte[] windows1251Bytes = "Преподаватель №".getBytes("Windows-1251");
+            name = new String(windows1251Bytes, StandardCharsets.UTF_8);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        teacher.setTeacherName(name + 1);
+        teacher.setDayList(dayList);
+
+        List<Teacher> teacherList = new ArrayList<>();
+        teacherList.add(teacher);
+        teacherList.add(teacher);
+        teacherList.add(teacher);
+
+        jxlsConvertor = new JXLSConvertor(teacherList);
         jxlsConvertor.convert();
     }
 }

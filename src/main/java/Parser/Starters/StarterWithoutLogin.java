@@ -1,10 +1,13 @@
 package Parser.Starters;
 
+import Parser.Model.Teacher;
 import Parser.Pages.CathedralSchedulePage;
+import Parser.Util.JXLSConvertor;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class StarterWithoutLogin extends Starter {
@@ -45,6 +48,7 @@ public class StarterWithoutLogin extends Starter {
 
         //TODO переделать этот костыль в поиск по значению или по тегу
         typeOfCathedral.selectByIndex(12);
+
         for (int j = 0; j < teacherList.size(); j++) { //teacherList.size()
             teacherList.get(j).click();
 
@@ -55,6 +59,10 @@ public class StarterWithoutLogin extends Starter {
                 e.printStackTrace();
             }
         }
-    }
 
+        List<Teacher> teacherListToExcel = super.getTeacherList();
+
+        JXLSConvertor jxlsConvertor = new JXLSConvertor(teacherListToExcel);
+        jxlsConvertor.convert();
+    }
 }
