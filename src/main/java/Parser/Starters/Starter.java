@@ -9,7 +9,6 @@ import Parser.Pages.SchedulePage;
 import Parser.Util.ConfigurationProperties;
 import Parser.Util.DateFormatter;
 import Parser.Util.DisciplineConfigurator;
-import Parser.Util.JXLSConvertor;
 import Parser.Util.JsonSerializer;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.By;
@@ -20,8 +19,6 @@ import org.openqa.selenium.chrome.ChromeOptions;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.time.Duration;
@@ -41,7 +38,6 @@ public abstract class Starter {
     private final GregorianCalendar instance = new GregorianCalendar();
     private Date endDate;
     private Date interimDate;
-    private List<Teacher> teacherList = new ArrayList<>();
 
     public void setup() {
 
@@ -64,6 +60,16 @@ public abstract class Starter {
         deleteExcelReport();*/
     }
 
+    public void scheduleWriteInFile(Teacher teacher) throws ParseException {
+        interimDate = findPreviousMondayForDate(startDate);
+        changeStartDate(convertDateInString(interimDate));
+
+        //TODO переделать на динамический выбор директории
+        while (interimDate.before(endDate)) {
+            writeScheduleWithDateInJsonFile(teacher);
+        }
+    }
+
     public void scheduleWriteInFile() throws ParseException {
         interimDate = findPreviousMondayForDate(startDate);
         changeStartDate(convertDateInString(interimDate));
@@ -71,16 +77,6 @@ public abstract class Starter {
         //TODO переделать на динамический выбор директории
         while (interimDate.before(endDate)) {
             writeScheduleWithDateInJsonFile();
-        }
-    }
-
-    public void scheduleWriteInFile(int teacherNumber) throws ParseException {
-        interimDate = findPreviousMondayForDate(startDate);
-        changeStartDate(convertDateInString(interimDate));
-
-        //TODO переделать на динамический выбор директории
-        while (interimDate.before(endDate)) {
-            writeScheduleWithDateInJsonFile(teacherNumber);
         }
     }
 
@@ -130,9 +126,8 @@ public abstract class Starter {
         }
     }
 
-    private void writeScheduleWithDateInJsonFile() {
+    private void writeScheduleWithDateInJsonFile(Teacher teacher) {
         int weekHours;
-        Teacher teacher = new Teacher();
         List<WebElement> tables = schedulePage.getSchedule();
         List<WebElement> days = schedulePage.getScheduleDays();
         List<Day> dayList = new ArrayList<>();
@@ -165,79 +160,18 @@ public abstract class Starter {
         //TODO в будущем переделать под Teacher
         //jsonSerializer.convertDayToJson(dayList, interimDate);
 
-        String name = "default";
-        try {
-            byte[] windows1251Bytes = "Преподаватель №".getBytes("Windows-1251");
-            name = new String(windows1251Bytes, StandardCharsets.UTF_8);
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-
         //TODO вынессти в отдельный метод ?
         DayAnalyser dayAnalyser = new DayAnalyser(dayList);
         weekHours = dayAnalyser.analyseListOfDays();
-        teacher.setTeacherName(name);
-        teacher.setDayList(dayList);
+        teacher.getDayList().addAll(dayList);
         teacher.setWeekHours(weekHours);
-
-        teacherList.add(teacher);
 
         addSevenDaysForInterimDate();
     }
 
-    private void writeScheduleWithDateInJsonFile(int teacherNumber) {
-        int weekHours;
-        Teacher teacher = new Teacher();
-        List<WebElement> tables = schedulePage.getSchedule();
-        List<WebElement> days = schedulePage.getScheduleDays();
-        List<Day> dayList = new ArrayList<>();
-        JsonSerializer jsonSerializer = new JsonSerializer();
-        DisciplineConfigurator disciplineConfigurator;
+    //TODO доделать вариант для пользователя без кафедр и преподавателя
+    private void writeScheduleWithDateInJsonFile() {
 
-        for (int i = 0; i < tables.size(); i++) {
-            List<WebElement> rows = tables.get(i).findElements(By.tagName("tr"));
-            Day day = new Day();
-            List<Discipline> disciplineList = new ArrayList<>();
-            day.setDayOfWeak(days.get(i).getText());
-
-            if (!new String(day.getDayOfWeak().getBytes(StandardCharsets.UTF_8)).contains("Воскресенье")) {
-                for (WebElement row : rows) {
-                    WebElement cell = row.findElement(By.className("table-schedule-discipline"));
-
-                    if (!cell.getText().isEmpty() && !cell.getTagName().equals("th")) {
-                        Discipline discipline = new Discipline();
-                        disciplineConfigurator = new DisciplineConfigurator(discipline);
-                        discipline = disciplineConfigurator.configureDisciplineWithTeacherNumber(row.getText(), teacherNumber);
-                        disciplineList.add(discipline);
-                    }
-                }
-
-                day.setDisciplineList(disciplineList);
-                dayList.add(day);
-            }
-        }
-
-        //TODO в будущем переделать под Teacher
-        //jsonSerializer.convertDayToJson(dayList, interimDate);
-
-        String name = "default";
-        try {
-            byte[] windows1251Bytes = "Преподаватель №".getBytes("Windows-1251");
-            name = new String(windows1251Bytes, StandardCharsets.UTF_8);
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-
-        //TODO вынессти в отдельный метод ?
-        DayAnalyser dayAnalyser = new DayAnalyser(dayList);
-        weekHours = dayAnalyser.analyseListOfDays();
-        teacher.setTeacherName(name + teacherNumber);
-        teacher.setDayList(dayList);
-        teacher.setWeekHours(weekHours);
-
-        teacherList.add(teacher);
-
-        addSevenDaysForInterimDate();
     }
 
     private void addSevenDaysForInterimDate() {
@@ -287,9 +221,5 @@ public abstract class Starter {
     public void tearDown() {
         schedulePage.logOut();
         webDriver.quit();
-    }
-
-    public List<Teacher> getTeacherList() {
-        return teacherList;
     }
 }

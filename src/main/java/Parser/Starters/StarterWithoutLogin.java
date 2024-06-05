@@ -6,12 +6,15 @@ import Parser.Util.JXLSConvertor;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class StarterWithoutLogin extends Starter {
     public static CathedralSchedulePage cathedralSchedulePage;
+    private List<Teacher> teacherListForExcel = new ArrayList<>();
 
     public void setup() {
         super.setup();
@@ -50,19 +53,32 @@ public class StarterWithoutLogin extends Starter {
         typeOfCathedral.selectByIndex(12);
 
         for (int j = 0; j < teacherList.size(); j++) { //teacherList.size()
+            Teacher teacher = new Teacher();
+
+            //TODO переделать в нормальную обработку имени
+            String name = "default";
+            try {
+                byte[] windows1251Bytes = "Преподаватель №".getBytes("Windows-1251");
+                name = new String(windows1251Bytes, StandardCharsets.UTF_8);
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+
+            teacher.setTeacherName(name + j);
+
             teacherList.get(j).click();
 
             try {
-                super.scheduleWriteInFile(j);
+                super.scheduleWriteInFile(teacher);
                 loginPage.clickScheduleButton();
             } catch (ParseException e) {
                 e.printStackTrace();
             }
+
+            teacherListForExcel.add(teacher);
         }
 
-        List<Teacher> teacherListToExcel = super.getTeacherList();
-
-        JXLSConvertor jxlsConvertor = new JXLSConvertor(teacherListToExcel);
+        JXLSConvertor jxlsConvertor = new JXLSConvertor(teacherListForExcel);
         jxlsConvertor.convert();
     }
 }

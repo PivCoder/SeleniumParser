@@ -1,10 +1,11 @@
 package Parser.Model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Teacher {
     private String teacherName;
-    private List<Day> dayList;
+    private List<Day> dayList = new ArrayList<>();
     private int weekHours;
 
     public Teacher() {
