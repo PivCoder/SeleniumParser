@@ -8,7 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class FileManager {
-    private void deleteScheduleFile() {
+    public void deleteScheduleFile() {
         File file = new File("src/main/resources/Schedule.txt");
 
         if (file.delete()) {
@@ -18,7 +18,7 @@ public class FileManager {
         }
     }
 
-    private void deleteFilesScheduleFolder(String directoryPath) {
+    public void deleteFilesScheduleFolder(String directoryPath) {
         Path dirPath = Paths.get(directoryPath);
 
         if (!Files.exists(dirPath) || !Files.isDirectory(dirPath)) {
@@ -36,12 +36,12 @@ public class FileManager {
         }
     }
 
-    private void deleteExcelReport(File file) {
+    public void deleteExcelReport(File file) {
         //TODO переименовать пути поиска
         if (file.delete()) {
-            System.out.println("File " + "src/main/resources/Excel/grouping_output.xlsx" + " deleted");
+            System.out.println("File " + file.getPath() + " deleted");
         } else {
-            System.out.println("Fail " + "src/main/resources/Excel/grouping_output.xlsx" + " deletion failed !");
+            System.out.println("Fail " + file.getPath() + " deletion failed !");
         }
     }
 }

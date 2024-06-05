@@ -45,3 +45,5 @@ hs_err_pid
 out/
 /gradle/
 /.gradle/
+/.idea/
+/gradle/
