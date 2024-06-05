@@ -1,25 +1,22 @@
 package Parser.Util;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 public class DateFormatter {
-    private Date FormattedDate;
-    private final DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+    private final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
-    public Date formatDate(String dateInString) {
+    public LocalDate formatDate(String dateInString) {
         try {
-            FormattedDate = dateFormat.parse(dateInString);
-        } catch (ParseException exception) {
-            System.err.println("Ошибка разбора даты. Пожалуйста, введите дату в правильном формате (dd.mm.yyyy).");
+            return LocalDate.parse(dateInString, dateFormat);
+        } catch (DateTimeParseException e) {
+            System.err.println("Ошибка формата даты: " + e.getMessage());
+            return null;
         }
-
-        return FormattedDate;
     }
 
-    public String formatDateInFormattedString(Date date) {
-        return dateFormat.format(date);
+    public String formatDateInFormattedString(LocalDate date) {
+        return date.format(dateFormat);
     }
 }

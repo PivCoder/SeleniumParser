@@ -78,7 +78,7 @@ public class StarterWithoutLogin extends Starter {
             teacherListForExcel.add(teacher);
         }
 
-        JXLSConvertor jxlsConvertor = new JXLSConvertor(teacherListForExcel);
+        JXLSConvertor jxlsConvertor = new JXLSConvertor(teacherListForExcel, getStartDate(), getEndDate());
         jxlsConvertor.convert();
     }
 }

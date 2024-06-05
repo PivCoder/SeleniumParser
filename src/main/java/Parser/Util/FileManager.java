@@ -36,9 +36,8 @@ public class FileManager {
         }
     }
 
-    private void deleteExcelReport() {
-        File file = new File("src/main/resources/Excel/grouping_output.xlsx");
-
+    private void deleteExcelReport(File file) {
+        //TODO переименовать пути поиска
         if (file.delete()) {
             System.out.println("File " + "src/main/resources/Excel/grouping_output.xlsx" + " deleted");
         } else {

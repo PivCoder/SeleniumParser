@@ -21,11 +21,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
+import java.time.DayOfWeek;
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Scanner;
 
@@ -34,10 +34,9 @@ public abstract class Starter {
     public static LoginPage loginPage;
     public static SchedulePage schedulePage;
     public static WebDriver webDriver;
-    private Date startDate;
-    private final GregorianCalendar instance = new GregorianCalendar();
-    private Date endDate;
-    private Date interimDate;
+    private LocalDate startDate;
+    private LocalDate endDate;
+    private LocalDate interimDate;
 
     public void setup() {
 
@@ -65,7 +64,7 @@ public abstract class Starter {
         changeStartDate(convertDateInString(interimDate));
 
         //TODO переделать на динамический выбор директории
-        while (interimDate.before(endDate)) {
+        while (interimDate.isBefore(endDate)) {
             writeScheduleWithDateInJsonFile(teacher);
         }
     }
@@ -75,20 +74,13 @@ public abstract class Starter {
         changeStartDate(convertDateInString(interimDate));
 
         //TODO переделать на динамический выбор директории
-        while (interimDate.before(endDate)) {
+        while (interimDate.isBefore(endDate)) {
             writeScheduleWithDateInJsonFile();
         }
     }
 
-    private Date findPreviousMondayForDate(Date inputDate) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(inputDate);
-
-        while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
-            calendar.add(Calendar.DAY_OF_WEEK, -1);
-        }
-
-        return calendar.getTime();
+    private LocalDate findPreviousMondayForDate(LocalDate inputDate) {
+        return inputDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
     }
 
     private void changeStartDate(String startDateInString) {
@@ -175,19 +167,13 @@ public abstract class Starter {
     }
 
     private void addSevenDaysForInterimDate() {
-        setInstance(interimDate);
-        instance.add(Calendar.DAY_OF_YEAR, 7);
-        interimDate = instance.getTime();
+        interimDate = interimDate.plusDays(7);
         changeStartDate(convertDateInString(interimDate));
     }
 
-    private String convertDateInString(Date dateToString) {
+    private String convertDateInString(LocalDate dateToString) {
         DateFormatter dateFormatter = new DateFormatter();
         return dateFormatter.formatDateInFormattedString(dateToString);
-    }
-
-    private void setInstance(Date dateToInstance) {
-        instance.setTime(dateToInstance);
     }
 
     public void setStartDate() {
@@ -206,15 +192,11 @@ public abstract class Starter {
         endDate = dateFormatter.formatDate(endDateInString);
     }
 
-    public Date getStartDate() {
+    public LocalDate getStartDate() {
         return startDate;
     }
 
-    public GregorianCalendar getInstance() {
-        return instance;
-    }
-
-    public Date getEndDate() {
+    public LocalDate getEndDate() {
         return endDate;
     }
 

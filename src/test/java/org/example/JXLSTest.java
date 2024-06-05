@@ -3,13 +3,15 @@ package org.example;
 import Parser.Model.Day;
 import Parser.Model.Discipline;
 import Parser.Model.Teacher;
+import Parser.Util.DateFormatter;
 import Parser.Util.JXLSConvertor;
 import org.junit.jupiter.api.Test;
 
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class JXLSTest {
@@ -57,7 +59,11 @@ public class JXLSTest {
         teacherList.add(teacher);
         teacherList.add(teacher);
 
-        jxlsConvertor = new JXLSConvertor(teacherList);
+        DateFormatter dateFormatter = new DateFormatter();
+        LocalDate startReportDate = dateFormatter.formatDate("10.10.2023");
+        LocalDate endReportDate = dateFormatter.formatDate("20.10.2023");
+
+        jxlsConvertor = new JXLSConvertor(teacherList, startReportDate, endReportDate);
         jxlsConvertor.convert();
     }
 }
