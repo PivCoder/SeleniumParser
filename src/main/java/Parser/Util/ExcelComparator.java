@@ -1,6 +1,9 @@
 package Parser.Util;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -8,13 +11,14 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
 public class ExcelComparator {
-    public static boolean compareExcelFiles(File file1, File file2) throws IOException {
-        try (InputStream is1 = new FileInputStream(file1);
-             InputStream is2 = new FileInputStream(file2);
+    public static boolean compareExcelFiles(File oldReportFile, File newReportFile) throws IOException {
+        try (InputStream is1 = new FileInputStream(oldReportFile);
+             InputStream is2 = new FileInputStream(newReportFile);
              Workbook wb1 = new XSSFWorkbook(is1);
              Workbook wb2 = new XSSFWorkbook(is2)) {
 
@@ -23,10 +27,54 @@ public class ExcelComparator {
             }
 
             for (int i = 0; i < wb1.getNumberOfSheets(); i++) {
-                Sheet sheet1 = wb1.getSheetAt(i);
-                Sheet sheet2 = wb2.getSheetAt(i);
+                Sheet sheetFromOldReportFile = wb1.getSheetAt(i);
+                Sheet sheetFromNewReportFile = wb2.getSheetAt(i);
 
-                if (!compareSheets(sheet1, sheet2)) {
+                if (!compareSheets(sheetFromOldReportFile, sheetFromNewReportFile)) {
+                    return false;
+                }
+            }
+
+            try (FileOutputStream fo1 = new FileOutputStream(oldReportFile);
+                 FileOutputStream fo2 = new FileOutputStream(oldReportFile)) {
+                wb1.write(fo1);
+                wb2.write(fo2);
+            }
+        }
+        return true;
+    }
+
+    private static boolean compareSheets(Sheet sheetFromOldReportFile, Sheet sheetFromNewReportFile) {
+        if (sheetFromOldReportFile.getLastRowNum() != sheetFromNewReportFile.getLastRowNum()) {
+            return false;
+        }
+
+        for (int i = 0; i <= sheetFromOldReportFile.getLastRowNum(); i++) {
+            Row rowFromOldReportFile = sheetFromOldReportFile.getRow(i);
+            Row rowFromNewReportFile = sheetFromNewReportFile.getRow(i);
+
+            if (!compareRows(rowFromOldReportFile, rowFromNewReportFile)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean compareRows(Row rowFromOldReportFile, Row rowFromNewReportFile) {
+        if ((rowFromOldReportFile == null && rowFromNewReportFile != null)
+                || (rowFromOldReportFile != null && rowFromNewReportFile == null)) {
+            return false;
+        }
+        if (rowFromOldReportFile != null) {
+            if (rowFromOldReportFile.getLastCellNum() != rowFromNewReportFile.getLastCellNum()) {
+                return false;
+            }
+
+            for (int i = 0; i < rowFromOldReportFile.getLastCellNum(); i++) {
+                Cell cellFromOldReportFile = rowFromOldReportFile.getCell(i);
+                Cell cellFromNewReportFile = rowFromNewReportFile.getCell(i);
+
+                if (!compareCells(cellFromOldReportFile, cellFromNewReportFile)) {
                     return false;
                 }
             }
@@ -34,70 +82,58 @@ public class ExcelComparator {
         return true;
     }
 
-    private static boolean compareSheets(Sheet sheet1, Sheet sheet2) {
-        if (sheet1.getLastRowNum() != sheet2.getLastRowNum()) {
+    private static boolean compareCells(Cell cellFromOldReportFile, Cell cellFromNewReportFile) {
+        if ((cellFromOldReportFile == null && cellFromNewReportFile != null)
+                || (cellFromOldReportFile != null && cellFromNewReportFile == null)) {
             return false;
         }
-
-        for (int i = 0; i <= sheet1.getLastRowNum(); i++) {
-            Row row1 = sheet1.getRow(i);
-            Row row2 = sheet2.getRow(i);
-
-            if (!compareRows(row1, row2)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private static boolean compareRows(Row row1, Row row2) {
-        if ((row1 == null && row2 != null) || (row1 != null && row2 == null)) {
-            return false;
-        }
-        if (row1 != null) {
-            if (row1.getLastCellNum() != row2.getLastCellNum()) {
+        if (cellFromOldReportFile != null) {
+            if (cellFromOldReportFile.getCellType() != cellFromNewReportFile.getCellType()) {
                 return false;
             }
 
-            for (int i = 0; i < row1.getLastCellNum(); i++) {
-                Cell cell1 = row1.getCell(i);
-                Cell cell2 = row2.getCell(i);
+            CellStyle cellStyleForOldReportFile = cellFromOldReportFile.getCellStyle();
+            CellStyle cellStyleForNewReportFile = cellFromNewReportFile.getCellStyle();
 
-                if (!compareCells(cell1, cell2)) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    private static boolean compareCells(Cell cell1, Cell cell2) {
-        if ((cell1 == null && cell2 != null) || (cell1 != null && cell2 == null)) {
-            return false;
-        }
-        if (cell1 != null) {
-            if (cell1.getCellType() != cell2.getCellType()) {
-                return false;
+            if(cellStyleForOldReportFile == null) {
+                cellStyleForOldReportFile = cellFromOldReportFile.getSheet().getWorkbook().createCellStyle();
             }
 
-            switch (cell1.getCellType()) {
+            if(cellStyleForNewReportFile == null) {
+                cellStyleForNewReportFile = cellFromNewReportFile.getSheet().getWorkbook().createCellStyle();
+            }
+
+            cellStyleForOldReportFile.setFillForegroundColor(IndexedColors.LIGHT_BLUE.getIndex());
+            cellStyleForOldReportFile.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            cellStyleForNewReportFile.setFillForegroundColor(IndexedColors.LIGHT_BLUE.getIndex());
+            cellStyleForNewReportFile.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+
+            switch (cellFromOldReportFile.getCellType()) {
                 case STRING:
-                    if (!cell1.getStringCellValue().equals(cell2.getStringCellValue())) {
+                    if (!cellFromOldReportFile.getStringCellValue().equals(cellFromNewReportFile.getStringCellValue())) {
+                        cellFromNewReportFile.setCellStyle(cellStyleForNewReportFile);
+                        cellFromOldReportFile.setCellStyle(cellStyleForOldReportFile);
                         return false;
                     }
                     break;
                 case NUMERIC:
-                    if (cell1.getNumericCellValue() != cell2.getNumericCellValue()) {
+                    if (cellFromOldReportFile.getNumericCellValue() != cellFromNewReportFile.getNumericCellValue()) {
+                        cellFromNewReportFile.setCellStyle(cellStyleForNewReportFile);
+                        cellFromOldReportFile.setCellStyle(cellStyleForOldReportFile);
                         return false;
                     }
                     break;
                 case BOOLEAN:
-                    if (cell1.getBooleanCellValue() != cell2.getBooleanCellValue()) {
+                    if (cellFromOldReportFile.getBooleanCellValue() != cellFromNewReportFile.getBooleanCellValue()) {
+                        cellFromNewReportFile.setCellStyle(cellStyleForNewReportFile);
+                        cellFromOldReportFile.setCellStyle(cellStyleForOldReportFile);
                         return false;
                     }
                     break;
                 case FORMULA:
-                    if (!cell1.getCellFormula().equals(cell2.getCellFormula())) {
+                    if (!cellFromOldReportFile.getCellFormula().equals(cellFromNewReportFile.getCellFormula())) {
+                        cellFromNewReportFile.setCellStyle(cellStyleForNewReportFile);
+                        cellFromOldReportFile.setCellStyle(cellStyleForOldReportFile);
                         return false;
                     }
                     break;

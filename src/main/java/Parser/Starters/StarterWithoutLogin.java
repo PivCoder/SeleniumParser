@@ -3,18 +3,17 @@ package Parser.Starters;
 import Parser.Model.Teacher;
 import Parser.Pages.CathedralSchedulePage;
 import Parser.Util.JXLSConvertor;
+import Parser.Util.StringIntoWindows1251Convertor;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class StarterWithoutLogin extends Starter {
     public static CathedralSchedulePage cathedralSchedulePage;
-    private List<Teacher> teacherListForExcel = new ArrayList<>();
+    private final List<Teacher> teacherListForExcel = new ArrayList<>();
 
     public void setup() {
         super.setup();
@@ -56,16 +55,8 @@ public class StarterWithoutLogin extends Starter {
             Teacher teacher = new Teacher();
 
             //TODO переделать в нормальную обработку имени
-            String name = "default";
-            try {
-                byte[] windows1251Bytes = "Преподаватель №".getBytes("Windows-1251");
-                name = new String(windows1251Bytes, StandardCharsets.UTF_8);
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
-
+            String name = StringIntoWindows1251Convertor.convertIntoWindows1251InUTF8("Преподаватель №");
             teacher.setTeacherName(name + j);
-
             teacherList.get(j).click();
 
             try {

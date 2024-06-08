@@ -6,14 +6,6 @@ public class Discipline {
     public Discipline() {
     }
 
-    public Discipline(String hourStart, String hourEnd, String discipline, String classroom, String teacher) {
-        this.hourStart = hourStart;
-        this.hourEnd = hourEnd;
-        this.discipline = discipline;
-        this.classroom = classroom;
-        this.teacher = teacher;
-    }
-
     public String getHourStart() {
         return hourStart;
     }

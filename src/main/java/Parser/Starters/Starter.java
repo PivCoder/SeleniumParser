@@ -9,7 +9,9 @@ import Parser.Pages.SchedulePage;
 import Parser.Util.ConfigurationProperties;
 import Parser.Util.DateFormatter;
 import Parser.Util.DisciplineConfigurator;
+import Parser.Util.DisciplineTypeExtractor;
 import Parser.Util.JsonSerializer;
+import Parser.Util.StringIntoWindows1251Convertor;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -27,6 +29,7 @@ import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 //TODO После выяснения вопроса с личными данными убрать дублирование кода
@@ -129,8 +132,9 @@ public abstract class Starter {
         for (int i = 0; i < tables.size(); i++) {
             List<WebElement> rows = tables.get(i).findElements(By.tagName("tr"));
             Day day = new Day();
-            List<Discipline> disciplineList = new ArrayList<>();
             day.setDayOfWeak(days.get(i).getText());
+            List<Discipline> disciplineList = new ArrayList<>();
+            Map<String, Integer> disciplineCounter;
 
             if (!new String(day.getDayOfWeak().getBytes(StandardCharsets.UTF_8)).contains("Воскресенье")) {
                 for (WebElement row : rows) {
@@ -143,6 +147,19 @@ public abstract class Starter {
                         disciplineList.add(discipline);
                     }
                 }
+
+                //TODO пока что все часы считаются по станадртной формуле "пара * 2 академических часа"
+                disciplineCounter = DisciplineTypeExtractor.countDisciplines(disciplineList);
+                String lecture = StringIntoWindows1251Convertor.convertIntoWindows1251InUTF8("Лекционные"),
+                        practice = StringIntoWindows1251Convertor.convertIntoWindows1251InUTF8("Практические"),
+                        labs = StringIntoWindows1251Convertor.convertIntoWindows1251InUTF8("Лабораторные"),
+                        exam = StringIntoWindows1251Convertor.convertIntoWindows1251InUTF8("Экзамен"),
+                        test = StringIntoWindows1251Convertor.convertIntoWindows1251InUTF8("Зачет");
+                teacher.setLectureHours(disciplineCounter.getOrDefault(lecture, 0) * 2);
+                teacher.setPractiseHours(disciplineCounter.getOrDefault(practice, 0) * 2);
+                teacher.setLabHours(disciplineCounter.getOrDefault(labs, 0) * 2);
+                teacher.setExamHours(disciplineCounter.getOrDefault(exam, 0) * 2);
+                teacher.setTestHours(disciplineCounter.getOrDefault(test, 0) * 2);
 
                 day.setDisciplineList(disciplineList);
                 dayList.add(day);
