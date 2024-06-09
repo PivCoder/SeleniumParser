@@ -2,17 +2,19 @@ package Parser.Model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class Teacher {
     private String teacherName;
     private List<Day> dayList = new ArrayList<>();
     private int weekHours = 0, lectureHours = 0, practiseHours = 0, labHours = 0, testHours = 0, examHours = 0;
+    private Map<String, Integer> disciplinesHours;
 
     public Teacher() {
 
     }
 
-    public Teacher(String teacherName, List<Day> dayList, int weekHours, int lectureHours, int practiseHours, int labHours, int testHours, int examHours) {
+    public Teacher(String teacherName, List<Day> dayList, int weekHours, int lectureHours, int practiseHours, int labHours, int testHours, int examHours, Map<String, Integer> disciplinesHours) {
         this.teacherName = teacherName;
         this.dayList = dayList;
         this.weekHours = weekHours;
@@ -21,6 +23,7 @@ public class Teacher {
         this.labHours = labHours;
         this.testHours = testHours;
         this.examHours = examHours;
+        this.disciplinesHours = disciplinesHours;
     }
 
     public String getTeacherName() {
@@ -85,5 +88,13 @@ public class Teacher {
 
     public void setExamHours(int examHours) {
         this.examHours += examHours;
+    }
+
+    public Map<String, Integer> getDisciplinesHours() {
+        return disciplinesHours;
+    }
+
+    public void setDisciplinesHours(Map<String, Integer> disciplinesHours) {
+        this.disciplinesHours = disciplinesHours;
     }
 }

@@ -1,6 +1,7 @@
 package Parser.Starters;
 
 import Parser.Analyser.DayAnalyser;
+import Parser.Analyser.TeacherDisciplinesAnalyser;
 import Parser.Model.Day;
 import Parser.Model.Discipline;
 import Parser.Model.Teacher;
@@ -54,12 +55,6 @@ public abstract class Starter {
         webDriver.manage().window().minimize();   //Выводит или скрывает окно исполнения
         webDriver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
         webDriver.get(ConfigurationProperties.getProperty("loginPage"));
-
-        //TODO удалить
-        /*
-        deleteScheduleFile();
-        deleteFilesScheduleFolder("src/main/resources/Json");
-        deleteExcelReport();*/
     }
 
     public void scheduleWriteInFile(Teacher teacher) throws ParseException {
@@ -174,6 +169,9 @@ public abstract class Starter {
         weekHours = dayAnalyser.analyseListOfDays();
         teacher.getDayList().addAll(dayList);
         teacher.setWeekHours(weekHours);
+
+        TeacherDisciplinesAnalyser teacherDisciplinesAnalyser = new TeacherDisciplinesAnalyser(teacher);
+        teacher.setDisciplinesHours(teacherDisciplinesAnalyser.countDisciplinesHours());
 
         addSevenDaysForInterimDate();
     }

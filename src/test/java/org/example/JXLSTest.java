@@ -1,5 +1,6 @@
 package org.example;
 
+import Parser.Analyser.TeacherDisciplinesAnalyser;
 import Parser.Model.Day;
 import Parser.Model.Discipline;
 import Parser.Model.Teacher;
@@ -29,7 +30,7 @@ public class JXLSTest {
         Discipline discipline2 = new Discipline();
         discipline2.setHourStart("1");
         discipline2.setHourEnd("2");
-        discipline2.setDiscipline("Программирование");
+        discipline2.setDiscipline("Теория электроцепей");
         discipline2.setClassroom(StringIntoWindows1251Convertor.convertIntoWindows1251InUTF8("Практические"));
         discipline2.setTeacher("teach");
 
@@ -86,6 +87,18 @@ public class JXLSTest {
         teacherList.add(teacher);
         teacherList.add(teacher);
         teacherList.add(teacher);
+
+        TeacherDisciplinesAnalyser teacherDisciplinesAnalyser = new TeacherDisciplinesAnalyser(teacher);
+        Map<String, Integer> disciplinesHoursCounter = teacherDisciplinesAnalyser.countDisciplinesHours();
+
+        for (Map.Entry<String, Integer> entry : disciplinesHoursCounter.entrySet()) {
+            String counter =
+                    StringIntoWindows1251Convertor
+                            .convertIntoWindows1251InUTF8(entry.getKey() + ": " + entry.getValue());
+            System.out.println(counter);
+        }
+
+        teacher.setDisciplinesHours(disciplinesHoursCounter);
 
         DateFormatter dateFormatter = new DateFormatter();
         LocalDate startReportDate = dateFormatter.formatDate("10.10.2023");
